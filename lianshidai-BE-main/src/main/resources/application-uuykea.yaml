@@ -1,0 +1,16 @@
+bce:
+  mysql:
+    host: 192.168.32.128
+    port: 3306
+    user: root
+    pw: 123 #
+    database: agri_predictor
+
+  redis:
+    host: 192.168.32.128
+    port: 6379
+    pw: 123
+    database: 0
+
+  oss:
+    dir-path: /root/home/

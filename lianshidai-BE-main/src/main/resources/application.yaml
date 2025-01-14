@@ -1,0 +1,71 @@
+server:
+    port: 8080
+
+spring:
+    application:
+        name: BCE-BE
+    profiles:
+        active: dev
+    datasource:
+        url: jdbc:mysql://${bce.mysql.host}:${bce.mysql.port:3306}/${bce.mysql.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        username: ${bce.mysql.user:root}
+        password: ${bce.mysql.pw:123}
+    data:
+        redis:
+            host: ${bce.redis.host}
+            port: ${bce.redis.port}
+            password: ${bce.redis.pw}
+            database: ${bce.redis.database}
+    servlet:
+        multipart:
+            max-request-size: 100MB
+            max-file-size: 100MB
+    mail:
+        #smtp服务主机
+        host: smtp.163.com
+        #服务协议
+        protocol: smtp
+        # 编码集
+        default-encoding: UTF-8
+        username: lianshidai25@163.com
+        #授权码
+        password: WKwnDYXGTkG8gepp
+        test-connection: true
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
+                        required: true
+
+
+
+mybatis-plus:
+    configuration:
+        default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
+    global-config:
+        db-config:
+            update-strategy: not_null
+            id-type: auto
+
+
+bce:
+    mysql:
+        host: ${bce.mysql.host}
+        port: ${bce.mysql.port}
+        user: ${bce.mysql.user}
+        pw: ${bce.mysql.pw}
+        database: ${bce.mysql.database}
+
+    redis:
+        host: ${bce.redis.host}
+        port: ${bce.redis.port}
+        pw: ${bce.redis.pw}
+        database: ${bce.redis.database}
+
+    oss:
+        dir-path: ${oss.dir-path}
+
