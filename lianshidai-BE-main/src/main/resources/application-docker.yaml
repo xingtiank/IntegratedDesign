@@ -1,0 +1,37 @@
+bce:
+  mysql:
+    host: 47.108.251.97
+    port: 3306
+    user: root
+    pw: lianshIdai25@41Osayhi
+    database: recruit
+
+  redis:
+    host: 47.108.251.97
+    port: 6379
+    pw: lianshIdai25@41Osayhi
+    database: 0
+
+  oss:
+    dir-path: /root/home/
+
+  article:
+    destpath: /bce/resource # 末尾不带\
+    urlprefix: http://www.lianshidai.com/api/article/material/ # 带 /
+
+mail-reception:
+  be:
+    recipient: 后端
+    to: 2164536159@qq.com
+  ftd:
+    recipient: 前端
+    to: 2164536159@qq.com
+  ml:
+    recipient: 机器学习
+    to: 2164536159@qq.com
+  bc:
+    recipient: 区块链
+    to: 2164536159@qq.com
+
+basedir:
+  local: D:\lianshidai\lianshidai-BE-main\src\main\resources\

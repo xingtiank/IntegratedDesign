@@ -34,7 +34,8 @@ public class EmailTest {
     public void test() {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(form);
-        List<String> list = List.of("2164536159@qq.com", "tmy13779754349@qq.com");
+        //List<String> list = List.of("2164536159@qq.com", "tmy13779754349@qq.com");
+        List<String> list = List.of("uuykea@qq.com");
         message.setTo(list.toArray(new String[list.size()]));
         message.setSubject("你好 测试邮件");
         Random random = new Random();

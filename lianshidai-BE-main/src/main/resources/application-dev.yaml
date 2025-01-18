@@ -15,8 +15,12 @@ bce:
   oss:
     dir-path: /root/home/
 
+  article:
+    destpath: src\main\resources\article # 末尾不带\
+    urlprefix: http://localhost:8080/article/material/
+
 mail-reception:
-  bce:
+  be:
     recipient: 后端
     to: 2164536159@qq.com
   ftd:
@@ -25,7 +29,7 @@ mail-reception:
   ml:
     recipient: 机器学习
     to: 2164536159@qq.com
-  blockchain:
+  bc:
     recipient: 区块链
     to: 2164536159@qq.com
 

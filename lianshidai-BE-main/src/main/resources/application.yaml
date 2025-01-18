@@ -1,5 +1,11 @@
 server:
     port: 8080
+#    ssl:
+#        protocol: TLS
+#        key-store: classpath:lianshidai.com.pfx
+#        key-store-password: ag8rgyvd
+    tomcat:
+        uri-encoding: UTF-8
 
 spring:
     application:
@@ -19,13 +25,14 @@ spring:
             database: ${bce.redis.database}
     servlet:
         multipart:
-            max-request-size: 100MB
+            max-request-size: 300MB
             max-file-size: 100MB
     mail:
         #smtp服务主机
         host: smtp.163.com
         #服务协议
         protocol: smtp
+        port: 587
         # 编码集
         default-encoding: UTF-8
         username: lianshidai25@163.com
@@ -39,8 +46,10 @@ spring:
                     starttls:
                         enable: true
                         required: true
-
-
+                    ssl:
+                        enable: true
+                    socketFactory:
+                        class: javax.net.ssl.SSLSocketFactory
 
 mybatis-plus:
     configuration:
@@ -50,6 +59,7 @@ mybatis-plus:
         db-config:
             update-strategy: not_null
             id-type: auto
+
 
 
 bce:
@@ -69,3 +79,6 @@ bce:
     oss:
         dir-path: ${oss.dir-path}
 
+    article:
+        destpath: ${bce.article.destpath}
+        urlprefix: ${bce.article.urlprefix}

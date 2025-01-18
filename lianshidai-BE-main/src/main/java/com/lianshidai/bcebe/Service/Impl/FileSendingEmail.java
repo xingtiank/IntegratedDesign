@@ -6,7 +6,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ByteArrayResource;
@@ -19,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 // 发送招新文件到指定邮箱
-@Slf4j
 @Service
 public class FileSendingEmail implements EmailService {
 
@@ -57,9 +55,7 @@ public class FileSendingEmail implements EmailService {
             ByteArrayResource resource = new ByteArrayResource(file.getBytes());
             helper.addAttachment(file.getOriginalFilename(), resource);
             mailSender.send(mimeMessage);
-//            log.info("文件邮件发送成功，接收者: {}", to);
         } catch (MessagingException | IOException e) {
-//            log.error("文件邮件发送失败: {}", e.getMessage());
             throw new RuntimeException("文件邮件发送失败");
         }
     }

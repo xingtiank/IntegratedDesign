@@ -1,7 +1,9 @@
 package com.lianshidai.bcebe.Pojo;
 
+
 import lombok.Getter;
 import lombok.Setter;
+
 
 
 // 封装返回结果
@@ -34,4 +36,5 @@ public class JsonResult<T> {
     public JsonResult(T data,String msg) {
         this(200, msg, data);
     }
+
 }

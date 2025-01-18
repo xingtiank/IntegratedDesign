@@ -7,13 +7,14 @@ import com.lianshidai.bcebe.Service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 //重置密码
 @RestController
+@Validated
 public class RetrievePassword {
     @Resource
     private UserService userService;
@@ -21,10 +22,14 @@ public class RetrievePassword {
     private VerificationEmailImpl verificationEmail;
 
     //重置密码
-    @RequestMapping(value = "/retrievePassword",method = POST)
+    @PostMapping(value = "/retrievePassword")
     @Transactional
-    public JsonResult<String> retrievePassword(@NotBlank(message = "邮箱不能为空") String to,@NotBlank(message = "验证码不能为空") String code, String password)
+    public JsonResult<String> retrievePassword(@Validated @NotBlank(message = "邮箱不能为空") String to,
+                                               @Validated @NotBlank(message = "验证码不能为空") String code, String password)
     {
+        if(password == null || password.length() < 10 || password.length() > 20){
+            return new JsonResult<>(400,"密码长度在10-20之间");
+        }
         if(!verificationEmail.CodeVerification(code, to)){
             return new JsonResult<>(400,"验证码错误");
         }
@@ -35,14 +40,14 @@ public class RetrievePassword {
         return new JsonResult<>(400,"重置失败");
     }
 
-
-
     //发送验证码
-    @RequestMapping(value = "/retrievePassword/email",method = POST)
-    public JsonResult<String> retrieveEmail(String to)
+    @PostMapping(value = "/retrievePassword/email")
+    public JsonResult<String> retrieveEmail(@Validated @NotBlank(message = "邮箱不能为空") String to)
     {
-        if(userService.lambdaQuery().eq(User::getEmail,to).one()==null){
-            return new JsonResult<>(400,"该邮箱未注册");
+        // 检查邮箱是否已注册
+        boolean exists = userService.lambdaQuery().eq(User::getEmail, to).exists();
+        if (!exists) {
+            return new JsonResult<>(400, "该邮箱未注册");
         }
         if(verificationEmail.EmailSend(to)){
             return new JsonResult<>(200,"发送成功");

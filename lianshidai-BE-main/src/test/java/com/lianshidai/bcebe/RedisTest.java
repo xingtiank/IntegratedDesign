@@ -28,4 +28,13 @@ public class RedisTest {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 中文测试
+     */
+    @Test
+    public void t(){
+        Object o =  (String) redisTemplate.opsForValue().get("article:test_questions");
+        System.out.println(o);
+    }
 }

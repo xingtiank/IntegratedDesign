@@ -1,15 +1,15 @@
 package com.lianshidai.bcebe.Pojo;
 
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-
-
+import org.springframework.validation.annotation.Validated;
 
 
 import java.io.Serializable;
@@ -17,8 +17,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Accessors(chain = true)
+@Validated
 public class User implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     @NotNull(message = "用户名不能为空")
@@ -46,5 +47,9 @@ public class User implements Serializable {
 
     private Integer status;
 
-    private Integer score;
+    private Integer scoreTotal;
+    private Integer scoreBe;
+    private Integer scoreFe;
+    private Integer scoreMl;
+    private Integer scoreBc;
 }
