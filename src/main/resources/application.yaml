@@ -1,0 +1,69 @@
+server:
+  port: 8080
+
+
+spring:
+  application:
+    name: IntegratedDesign
+  profiles:
+    #    active: formal
+    active: dev
+  mail:
+    #smtp服务主机
+    host: smtp.qq.com
+    #服务协议
+    protocol: smtps
+    port: 465
+    # 编码集
+    default-encoding: UTF-8
+    username: 2164536159@qq.com
+    #授权码
+    password: xqobpfdbpoutebbi
+    test-connection: true
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+  datasource:
+    url: jdbc:mysql://${be.mysql.host}:${be.mysql.port:3306}/${be.mysql.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${be.mysql.user:root}
+    password: ${be.mysql.pw:}
+  data:
+    redis:
+      host: ${be.redis.host}
+      port: ${be.redis.port}
+      password: ${be.redis.pw:}
+      database: ${be.redis.database}
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+
+
+
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      update-strategy: not_null
+      id-type: auto
+
+#日志
+logging:
+  level:
+    root: info
+
+amap-web:
+  key1: b37ebc0a0eb576a1cc6f432b2a5439f7
+  key2: 6357b92528d98f46173aaede82dd2e44
+
