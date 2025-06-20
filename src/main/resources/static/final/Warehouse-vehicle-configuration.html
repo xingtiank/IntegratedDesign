@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VRP 问题配置 - 适配新接口</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .item-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f1f1f1;
+            position: relative;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+            margin-top: 25px;
+            /* 默认情况下，复选框组有顶部边距 */
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 150px;
+        }
+
+        input[type="number"]:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .vehicle-image {
+            width: 85px;
+            height: 40px;
+            object-fit: contain;
+            background-color: #f0f0f0;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-right: 10px;
+            padding: 2px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .submit-btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            padding: 12px 30px;
+            font-size: 18px;
+        }
+
+        .sub-group {
+            border-left: 3px solid #007bff;
+            padding-left: 10px;
+            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        /* --- 新增样式 --- */
+        .vehicle-options-container {
+            display: flex;
+            gap: 25px;
+            /* 设置两个复选框之间的间距 */
+            width: 100%;
+            /* 占据整行，使其下方的内容换行 */
+            align-items: center;
+            margin-top: 10px;
+            /* 与上方元素的间距 */
+        }
+
+        /* 覆盖掉容器内复选框组的顶部边距，使它们在同一水平线上对齐 */
+        .vehicle-options-container .form-group.checkbox {
+            margin-top: 0;
+        }
+
+        /* --- 样式修改结束 --- */
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>车辆路径问题 (VRP) 配置</h1>
+
+        <form id="vrp-form">
+            <!-- 车辆配置 -->
+            <div class="form-section">
+                <h2>车辆配置 (Detailed Vehicles)</h2>
+                <div id="vehicle-list"></div>
+                <button type="button" id="add-vehicle" class="btn btn-success">添加车辆类型</button>
+            </div>
+
+            <!-- 任务配置 -->
+            <div class="form-section">
+                <h2>任务列表 (Tasks)</h2>
+                <div id="task-list"></div>
+                <button type="button" id="add-task" class="btn btn-success">添加任务</button>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="submit-btn-container">
+                <button type="submit" class="btn btn-primary submit-btn">计算并跳转</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 车辆配置模板 -->
+    <template id="vehicle-template">
+        <div class="item-row vehicle-item">
+            <img src="a.jpg" alt="Vehicle Image" class="vehicle-image">
+            <div class="form-group">
+                <label>车辆类型ID</label>
+                <select data-field="vehicleTypeId" class="vehicle-type-select">
+                    <option value="small_van" data-img="a.jpg">车辆A</option>
+                    <option value="medium_truck" data-img="b.jpg">车辆B</option>
+                    <option value="large_truck" data-img="c.jpg">车辆C</option>
+                    <option value="compact_van" data-img="d.jpg">车辆D</option>
+                    <option value="heavy_duty_truck" data-img="e.jpg">车辆E</option>
+                    <option value="pickup_truck" data-img="f.jpg">车辆F</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>数量</label>
+                <input type="number" data-field="numberOfVehicle" value="1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label>车库点 (Depot)</label>
+                <select data-field="depotLocation" class="poi-select">
+                    <option value="">正在加载POI...</option>
+                </select>
+            </div>
+
+            <!-- --- HTML 结构修改 --- -->
+            <!-- 新建一个容器，将两个复选框选项包裹起来 -->
+            <div class="vehicle-options-container">
+                <div class="form-group checkbox">
+                    <input type="checkbox" class="unlimited-vehicle-checkbox">
+                    <label>数量无限制</label>
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" data-field="IsReturnToDepot" checked>
+                    <label>任务结束后返回车库</label>
+                </div>
+            </div>
+            <!-- --- HTML 修改结束 --- -->
+
+            <button type="button" class="btn btn-danger remove-btn">移除</button>
+        </div>
+    </template>
+
+    <!-- 任务模板 -->
+    <template id="task-template">
+        <div class="item-row task-item">
+            <button type="button" class="btn btn-danger remove-btn">移除</button>
+
+            <div class="form-group">
+                <label>任务类型</label>
+                <select data-field="taskType" class="task-type-select">
+                    <option value="service">服务 (service)</option>
+                    <option value="shipment">运输 (shipment)</option>
+                </select>
+            </div>
+            <div class="form-group"><label>重量</label><input type="number" data-field="weight" value="0"></div>
+            <div class="form-group"><label>体积</label><input type="number" data-field="volume" value="0"></div>
+            <div class="form-group"><label>优先级</label><input type="number" data-field="priority" value="0" min="0">
+            </div>
+
+            <div class="sub-group">
+                <div class="form-group pickup-group"><label>取货/服务点</label><select data-field="pickUpLocation"
+                        class="poi-select"></select></div>
+                <div class="form-group delivery-group hidden"><label>送货点</label><select data-field="deliveryLocation"
+                        class="poi-select"></select></div>
+            </div>
+
+            <div class="form-group checkbox" style="width: 100%;"><input type="checkbox"
+                    class="tw-checkbox"><label>时间窗约束</label></div>
+
+            <div class="sub-group tw-fields-group hidden">
+                <div class="form-group"><label>取货/服务 开始时间</label><input type="number" data-field="pickUpTimeWindowStart"
+                        value="0"></div>
+                <div class="form-group"><label>取货/服务 结束时间</label><input type="number" data-field="pickUpTimeWindowEnd"
+                        value="0"></div>
+                <div class="form-group delivery-group hidden"><label>送货 开始时间</label><input type="number"
+                        data-field="deliveryTimeWindowStart" value="0"></div>
+                <div class="form-group delivery-group hidden"><label>送货 结束时间</label><input type="number"
+                        data-field="deliveryTimeWindowEnd" value="0"></div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ---- DOM元素和模板获取 ----
+            const vehicleList = document.getElementById('vehicle-list');
+            const taskList = document.getElementById('task-list');
+            const addVehicleBtn = document.getElementById('add-vehicle');
+            const addTaskBtn = document.getElementById('add-task');
+            const form = document.getElementById('vrp-form');
+            const vehicleTemplate = document.getElementById('vehicle-template');
+            const taskTemplate = document.getElementById('task-template');
+
+            let poiData = [];
+
+            // ---- 功能函数 ----
+            const populatePoiSelect = (selectElement) => {
+                selectElement.innerHTML = '<option value="">---请选择地点---</option>';
+                poiData.forEach(poi => {
+                    const option = document.createElement('option');
+                    option.value = poi.id;
+                    option.textContent = poi.name || `POI ID: ${poi.id}`;
+                    option.dataset.longitude = poi.longitude;
+                    option.dataset.latitude = poi.latitude;
+                    selectElement.appendChild(option);
+                });
+            };
+
+            const addVehicleRow = () => {
+                const clone = vehicleTemplate.content.cloneNode(true);
+                populatePoiSelect(clone.querySelector('.poi-select'));
+                vehicleList.appendChild(clone);
+            };
+
+            const addTaskRow = () => {
+                const clone = taskTemplate.content.cloneNode(true);
+                clone.querySelectorAll('.poi-select').forEach(populatePoiSelect);
+                taskList.appendChild(clone);
+            };
+
+            const handleDynamicEvents = (e) => {
+                const target = e.target;
+                const row = target.closest('.item-row');
+                if (!row) return;
+
+                if (target.matches('.remove-btn')) row.remove();
+                if (target.matches('.vehicle-type-select')) {
+                    const img = row.querySelector('.vehicle-image');
+                    const selectedOption = target.options[target.selectedIndex];
+                    if (img && selectedOption?.dataset.img) img.src = selectedOption.dataset.img;
+                }
+                if (target.matches('.unlimited-vehicle-checkbox')) {
+                    row.querySelector('[data-field="numberOfVehicle"]').disabled = target.checked;
+                }
+                if (target.matches('.task-type-select')) {
+                    row.querySelectorAll('.delivery-group').forEach(el => el.classList.toggle('hidden', target.value !== 'shipment'));
+                }
+                if (target.matches('.tw-checkbox')) {
+                    row.querySelector('.tw-fields-group').classList.toggle('hidden', !target.checked);
+                }
+            };
+
+            /**
+             * 表单提交处理函数
+             * @param {Event} e 
+             */
+            const handleFormSubmit = async (e) => {
+                e.preventDefault();
+
+                // 1. 收集车辆数据 - 此处为核心修改点
+                const detailedVehicles = [...vehicleList.querySelectorAll('.vehicle-item')].map(row => {
+                    const unlimitedCheckbox = row.querySelector('.unlimited-vehicle-checkbox');
+
+                    // 获取车库的<select>和选中的<option>
+                    const depotSelect = row.querySelector('[data-field="depotLocation"]');
+                    const selectedDepotOption = depotSelect.options[depotSelect.selectedIndex];
+
+                    return {
+                        vehicleTypeId: row.querySelector('[data-field="vehicleTypeId"]').value,
+                        numberOfVehicle: (unlimitedCheckbox?.checked) ? -1 : parseInt(row.querySelector('[data-field="numberOfVehicle"]').value, 10),
+                        // 从选中的option中获取经纬度
+                        depotLongitude: selectedDepotOption ? parseFloat(selectedDepotOption.dataset.longitude) : null,
+                        depotLatitude: selectedDepotOption ? parseFloat(selectedDepotOption.dataset.latitude) : null,
+                        isReturnToDepot: row.querySelector('[data-field="IsReturnToDepot"]').checked,
+                    };
+                });
+
+                // 2. 收集任务数据 (此部分逻辑不变)
+                const tasks = [...taskList.querySelectorAll('.task-item')].map(row => {
+                    const getLocData = (fieldName) => {
+                        const select = row.querySelector(`[data-field="${fieldName}"]`);
+                        const option = select.options[select.selectedIndex];
+                        return {
+                            longitude: option ? parseFloat(option.dataset.longitude) : null,
+                            latitude: option ? parseFloat(option.dataset.latitude) : null
+                        }
+                    };
+
+                    const pickUp = getLocData('pickUpLocation');
+                    const delivery = getLocData('deliveryLocation');
+
+                    const task = {
+                        taskType: row.querySelector('[data-field="taskType"]').value,
+                        weight: parseInt(row.querySelector('[data-field="weight"]').value, 10),
+                        volume: parseInt(row.querySelector('[data-field="volume"]').value, 10),
+                        priority: parseInt(row.querySelector('[data-field="priority"]').value, 10),
+                        pickUpLongitude: pickUp.longitude,
+                        pickUpLatitude: pickUp.latitude,
+                        withTW: row.querySelector('.tw-checkbox').checked,
+                        pickUpTimeWindowStart: parseFloat(row.querySelector('[data-field="pickUpTimeWindowStart"]').value),
+                        pickUpTimeWindowEnd: parseFloat(row.querySelector('[data-field="pickUpTimeWindowEnd"]').value),
+                        deliveryLongitude: null, deliveryLatitude: null,
+                        deliveryTimeWindowStart: 0, deliveryTimeWindowEnd: 0
+                    };
+
+                    if (task.taskType === 'shipment') {
+                        task.deliveryLongitude = delivery.longitude;
+                        task.deliveryLatitude = delivery.latitude;
+                        task.deliveryTimeWindowStart = parseFloat(row.querySelector('[data-field="deliveryTimeWindowStart"]').value);
+                        task.deliveryTimeWindowEnd = parseFloat(row.querySelector('[data-field="deliveryTimeWindowEnd"]').value);
+                    }
+                    return task;
+                });
+
+                if (detailedVehicles.length === 0 || tasks.length === 0) {
+                    alert('请至少添加一个车辆配置和一个任务！');
+                    return;
+                }
+
+                const requestBody = { detailedVehicles, tasks };
+                console.log("准备发送到后端的数据:", JSON.stringify(requestBody, null, 2));
+
+                // 3. 发送POST请求 (此部分逻辑不变)
+                try {
+                    const response = await fetch('http://localhost:8080/VRP', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.code === 200) {
+                        sessionStorage.setItem('vrpResultData', JSON.stringify(result.data));
+                        window.location.href = './move.html';
+                    } else {
+                        alert(`计算失败: ${result.msg || response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error('提交请求时出错:', error);
+                    alert(`请求错误: ${error.message}. 请检查后端服务是否正常。`);
+                }
+            };
+
+            // ---- 页面初始化 ----
+            const initializePage = async () => {
+                try {
+                    const response = await fetch('http://localhost:8080/poi');
+                    const data = await response.json();
+                    if (data.code === 200) {
+                        poiData = data.data;
+                    } else { throw new Error(data.msg); }
+                } catch (error) {
+                    console.error('获取POI点失败:', error);
+                    alert(`获取POI点失败: ${error.message}，将无法选择地点。`);
+                }
+
+                addVehicleRow();
+                addTaskRow();
+
+                addVehicleBtn.addEventListener('click', addVehicleRow);
+                addTaskBtn.addEventListener('click', addTaskRow);
+                form.addEventListener('submit', handleFormSubmit);
+
+                // 使用单一事件监听器处理所有动态元素的事件
+                document.body.addEventListener('change', handleDynamicEvents);
+                document.body.addEventListener('click', handleDynamicEvents);
+            };
+
+            initializePage();
+        });
+    </script>
+
+</body>
+
+</html>

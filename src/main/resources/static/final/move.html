@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>交通运输模拟</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <style>
+        /* --- 基本样式和布局样式（保持不变）--- */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f4f4f4;
+            overflow: hidden;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100%;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 30%;
+            max-width: 450px;
+            min-width: 300px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            box-sizing: border-box;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            margin: 5px 0;
+            padding: 15px;
+        }
+
+        .panel h2 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .left-panel .image-panel {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .image-panel img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            flex: 1;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-card {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .input-card .btn {
+            margin-right: 1.2rem;
+            width: 9rem;
+        }
+
+        .input-card .btn:last-child {
+            margin-right: 0;
+        }
+
+        /* --- 新增：为可点击的图片添加鼠标手型 --- */
+        .zoomable {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .zoomable:hover {
+            transform: scale(1.02);
+            /* 轻微放大效果提示可点击 */
+        }
+
+        /* --- 新增：图片放大功能的模态框样式 --- */
+        .modal {
+            display: none;
+            /* 默认隐藏 */
+            position: fixed;
+            /* 固定定位，覆盖整个页面 */
+            z-index: 2000;
+            /* 确保在最顶层 */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            /* 半透明黑色背景 */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoom 0.5s;
+            /* 添加动画效果 */
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(0.1)
+            }
+
+            to {
+                transform: scale(1)
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #bbb;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 主布局容器 -->
+    <div class="main-layout">
+        <!-- 左侧面板 -->
+        <div class="left-panel">
+            <div class="panel image-panel">
+                <h2>目标函数变化图</h2>
+                <!-- 修改：给图片添加 zoomable 类 -->
+                <img id="progress-img" class="zoomable" src="http://localhost:8080/output/progress.png" alt="目标函数变化图">
+            </div>
+            <div class="panel image-panel">
+                <h2>路径</h2>
+                <!-- 修改：给图片添加 zoomable 类 -->
+                <img id="plot-img" class="zoomable" src="http://localhost:8080/output/plot.png" alt="路径">
+            </div>
+        </div>
+
+        <!-- 右侧面板 -->
+        <div class="right-panel">
+            <div class="map-container">
+                <div id="container"></div>
+                <div class="input-card">
+                    <h4>轨迹回放控制</h4>
+                    <div class="input-item">
+                        <input type="button" class="btn" value="开始动画" id="start" onclick="startAnimation()" />
+                        <input type="button" class="btn" value="暂停动画" id="pause" onclick="pauseAnimation()" />
+                    </div>
+                    <div class="input-item">
+                        <input type="button" class="btn" value="继续动画" id="resume" onclick="resumeAnimation()" />
+                        <input type="button" class="btn" value="变速动画" id="stop" onclick="changeSpeed()" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增：图片放大的模态框HTML结构 -->
+    <div id="image-modal" class="modal">
+        <span id="modal-close-btn" class="modal-close">×</span>
+        <img class="modal-content" id="modal-img">
+    </div>
+
+</body>
+<script>
+    window._AMapSecurityConfig = {
+        securityJsCode: "xxxx", // 请替换成你自己的安全密钥
+    };
+</script>
+<script language="javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=51a9a0fa8b33653d4658a2b570ae5b73"></script>
+
+<script language="javascript">
+    // --- 地图和车辆动画逻辑（保持不变）---
+    window.speed = 1;
+    window.markers = [];
+    const map = new AMap.Map("container", { center: [104.100221, 30.675709], zoom: 17 });
+    const vehicleImageMap = { "small_van": "a.jpg", "medium_truck": "b.jpg", "large_truck": "c.jpg", "compact_van": "d.jpg", "heavy_duty_truck": "e.jpg", "pickup_truck": "f.jpg" };
+    function getRandomColor() { let color = '#'; for (let i = 0; i < 6; i++) { color += '0123456789ABCDEF'[Math.floor(Math.random() * 16)]; } return color; }
+    function createNewCar(path) { if (!map) return; try { const lineArr = path.polyline; if (!lineArr || lineArr.length === 0) return; const carImage = vehicleImageMap[path.vehicleTypeId] || 'f.jpg'; const marker = new AMap.Marker({ map, position: lineArr[0], icon: carImage, offset: new AMap.Pixel(-26, -13), autoRotation: true, angle: -90, }); window.markers.push(marker); new AMap.Polyline({ map, path: lineArr, showDir: true, strokeColor: getRandomColor(), strokeWeight: 6 }); const passedPolyline = new AMap.Polyline({ map, strokeColor: "#AF5", strokeWeight: 6 }); marker.on("moving", (e) => passedPolyline.setPath(e.passedPath)); marker.moveAlong(lineArr, 200, (e) => e * window.speed > 1 ? 1 : e * window.speed); } catch (error) { console.error('Error in createNewCar:', error); } }
+    //获取后端所有poi点
+    // fetch('http://localhost:8080/poi')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         if (data.code === 200) {
+    //             const pois = data.data;
+    //             pois.forEach(poi => {
+    //                 createPOIMarker(poi.poi_lat, poi.poi_lon, poi.poi_type);
+    //             });
+    //         } else {
+    //             console.error('Failed to fetch POI points:', data.msg);
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.error('Error fetching POI points:', error);
+    //     });
+    // 创建POI点标记
+    const typeToImageMap = {
+        '1': '1.png',
+        '2': '2.png',
+        '3': '3.png',
+        '4': '4.png',
+        '5': '5.png',
+        '6': '6.png',
+        '7': '7.png',
+        '8': '8.png',
+        '9': '9.png',
+        '10': '10.png',
+        '11': '11.png',
+        '12': '12.png',
+        '13': '13.png',
+        '14': '14.png',
+        '15': '15.png',
+        '16': '16.png',
+    };
+    function createPOIMarker(lat, lon, type) {
+        // 根据type获取图片路径，默认使用一个默认图片
+        const imageSrc = typeToImageMap[type] || 'https://a.amap.com/jsapi_demos/static/demo-center/icons/dir-via-marker.png';
+        //点标记显示内容
+        let poiContent = `<div class="custom-content-marker">
+        <img src="${imageSrc}">
+        </div>`;
+        let position = new AMap.LngLat(lon, lat);
+        let poi = new AMap.Marker({
+            position: position,  // 注意：高德地图的坐标顺序是 [经度, 纬度]
+            content: poiContent, //将 html 传给 content
+            offset: new AMap.Pixel(-13, -30),
+        });
+
+        map.add(poi);
+    }
+    // 页面加载完成后执行的脚本
+    document.addEventListener('DOMContentLoaded', () => {
+        // 原有的路径加载逻辑
+        const vrpResultData = sessionStorage.getItem('vrpResultData');
+        if (vrpResultData) {
+            const paths = JSON.parse(vrpResultData);
+            paths.forEach(path => createNewCar(path));
+        } else {
+            console.error("未找到路径规划结果！");
+            document.body.innerHTML = '<h1>未找到路径规划结果，请返回首页重新计算。</h1>';
+        }
+
+        // --- 新增：图片放大功能的JavaScript逻辑 ---
+
+        // 获取需要的DOM元素
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        const closeBtn = document.getElementById('modal-close-btn');
+        const zoomableImages = document.querySelectorAll('.zoomable');
+
+        // 为所有可放大的图片添加点击事件监听
+        zoomableImages.forEach(img => {
+            img.onclick = function () {
+                modal.style.display = "flex"; // 使用flex以方便居中
+                modalImg.src = this.src; // 将点击图片的源赋给模态框图片
+            }
+        });
+
+        // 点击关闭按钮时，隐藏模态框
+        closeBtn.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // 点击模态框的背景（遮罩层）时，也隐藏模态框
+        modal.onclick = function (event) {
+            // 确保点击的是背景而不是图片本身
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    });
+
+    // --- 按钮功能逻辑（保持不变）---
+    function startAnimation() { resumeAnimation(); }
+    function pauseAnimation() { window.markers.forEach(marker => marker && marker.pauseMove()); }
+    function resumeAnimation() { window.markers.forEach(marker => marker && marker.resumeMove()); }
+    function changeSpeed() {
+        window.speed = window.speed === 2 ? 1 : 2;
+        pauseAnimation();
+        resumeAnimation();
+    }
+</script>
+
+</html>
