@@ -110,6 +110,7 @@ public class VRPServiceImpl implements VRPService {
                 Service.Builder service = Service.Builder.newInstance("task_"+count++)
                         .addSizeDimension(WEIGHT_INDEX, task.getWeight())
                         .addSizeDimension(VOLUME_INDEX, task.getVolume())
+                        .addSizeDimension(SHIPMENT_COUNT_INDEX, 1)
                         .setLocation(Location.newInstance(task.getPickUpLongitude(), task.getPickUpLatitude()));
                 if(task.getWithTW()){
                     service.addTimeWindow(task.getPickUpTimeWindowEnd(), task.getPickUpTimeWindowStart());
@@ -122,6 +123,7 @@ public class VRPServiceImpl implements VRPService {
                 Shipment.Builder  shipment = Shipment.Builder.newInstance("task_"+count++)
                         .addSizeDimension(WEIGHT_INDEX, task.getWeight())
                         .addSizeDimension(VOLUME_INDEX, task.getVolume())
+                        .addSizeDimension(SHIPMENT_COUNT_INDEX, 1)
                         .setPickupLocation(Location.newInstance(task.getPickUpLongitude(), task.getPickUpLatitude()))
                         .setDeliveryLocation(Location.newInstance(task.getDeliveryLongitude(), task.getDeliveryLatitude()));
                 if (task.getWithTW()){
