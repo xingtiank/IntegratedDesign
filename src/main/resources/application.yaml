@@ -16,7 +16,7 @@ spring:
     port: 465
     # 编码集
     default-encoding: UTF-8
-    username: 2164536159@qq.com
+    username: ******
     #授权码
     password: xqobpfdbpoutebbi
     test-connection: true
@@ -64,6 +64,6 @@ logging:
     root: info
 
 amap-web:
-  key1: b37ebc0a0eb576a1cc6f432b2a5439f7
-  key2: 6357b92528d98f46173aaede82dd2e44
+  key1: ********
+  key2: ********
 
